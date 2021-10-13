@@ -9,21 +9,25 @@ yarn install
 Example of usage:
 
 ```javascript
-import ClientSendingBlue from 'sendinblue-simple-client';
+import ClientSendingBlue, { EmailUser } from 'sendinblue-simple-client';
 
-const mySecretApiKey = process.env.API_KEY; 
+const mySecretApiKey = process.env.API_KEY;
 
 async function main() {
-  const emailClient = new ClientSendingBlue(
-    mySecretApiKey,
+  const emailClient: ClientSendingBlue = new ClientSendingBlue(
+    mySecretApiKey
   );
-  const sender = { name: 'dotnotreply', email: 'dotnotreply@mydomain.com.br' };
 
-  const destination = {
+  const sender: EmailUser = {
+    name: 'dotnotreply',
+    email: 'dotnotreply@mydomain.com.br',
+  };
+
+  const destination: EmailUser = {
     name: 'John',
     email: 'john@doe.com',
   };
-  
+
   const content = await emailClient.templatesProvider(3);
   if (content) {
     try {
@@ -40,10 +44,11 @@ async function main() {
       });
       console.log(response);
     } catch (error) {
-      console.lor(error);
+      console.log(error);
     }
   }
 }
 
 main();
+
 ```

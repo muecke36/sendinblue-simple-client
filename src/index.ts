@@ -20,6 +20,7 @@ export type EmailUser = {
   email: string;
   name: string;
 };
+
 export type MailerOptions = {
   sender: EmailUser;
   to: EmailUser[];
