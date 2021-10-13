@@ -16,12 +16,13 @@ const defaultOptions = {
   subject: '[Subject] My subject info',
 };
 
+export type EmailUser = {
+  email: string;
+  name: string;
+};
 export type MailerOptions = {
-  sender: {
-    email: string;
-    name: string;
-  };
-  to: { email: string; name: string }[];
+  sender: EmailUser;
+  to: EmailUser[];
   subject: string;
   content?: string;
   contentParams: {
