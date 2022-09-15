@@ -1,5 +1,5 @@
 import { templatesProvider } from './templatesProvider';
-import { emailClient } from './emailClient';
+import { emailClient, emailClientByTemplateId, updateTemplate } from './emailClient';
 
 const defaultOptions = {
   to: [
@@ -26,6 +26,7 @@ export type MailerOptions = {
   to: EmailUser[];
   subject: string;
   content?: string;
+  templateId: number;
   contentParams: {
     [key: string]: string;
   };
@@ -36,8 +37,14 @@ export class SendinBlueClient {
   constructor(apiKey: string) {
     this.apiKey = apiKey;
   }
+  async updateTemplate(tempalteId: number, content: string): Promise<any> {
+    return updateTemplate(tempalteId, content, this.apiKey);
+  }
   async sendEmail(options: MailerOptions | any) {
     return await emailClient(options, this.apiKey);
+  }
+  async sendEmailWithTemplateById(options: MailerOptions | any) {
+    return await emailClientByTemplateId(options, this.apiKey);
   }
   async templatesProvider(templateId = 0) {
     return await templatesProvider(templateId, this.apiKey);

@@ -3,7 +3,7 @@
 To install you only need to:
 
 ```
-yarn install
+yarn add sendinblue-simple-client
 ```
 
 Example of usage:
@@ -14,9 +14,7 @@ import ClientSendingBlue, { EmailUser } from 'sendinblue-simple-client';
 const mySecretApiKey = process.env.API_KEY;
 
 async function main() {
-  const emailClient: ClientSendingBlue = new ClientSendingBlue(
-    mySecretApiKey
-  );
+  const emailClient: ClientSendingBlue = new ClientSendingBlue(mySecretApiKey);
 
   const sender: EmailUser = {
     name: 'dotnotreply',
@@ -31,18 +29,31 @@ async function main() {
   const content = await emailClient.templatesProvider(3);
   if (content) {
     try {
-      const response = await emailClient.sendEmail({
+      const responseOfContent = await emailClient.sendEmail({
         sender: sender,
         to: [destination],
         subject: '[SUBJECT-here] MY Subject',
-
         content: content,
         contentParams: {
           name: 'John Doe',
           someOtherParam: '123123',
         },
       });
-      console.log(response);
+
+      // or send using a template Id
+      const responseOfsendByTemplateId =
+        await emailClient.sendEmailWithTemplateById({
+          sender: sender,
+          to: [destination],
+          subject: '[SUBJECT-here] MY Subject',
+          contentParams: {
+            name: 'John Doe',
+            someOtherParam: '123123',
+          },
+          templateId: 1,
+        });
+
+      console.log({ responseOfContent, responseOfsendByTemplateId });
     } catch (error) {
       console.log(error);
     }
@@ -50,5 +61,4 @@ async function main() {
 }
 
 main();
-
 ```
