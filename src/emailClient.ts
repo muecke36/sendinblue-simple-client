@@ -1,72 +1,59 @@
-import { MailerOptions } from '.';
+import bent from 'bent';
+import { ContactInfo, ContactOptions, MailerOptions } from './index.js';
 
-const SibApiV3Sdk = require('sib-api-v3-sdk');
-const defaultClient = SibApiV3Sdk.ApiClient.instance;
+export class EmailClient {
+  constructor(private apiKey: string) {}
 
-export const emailClient = (
-  { sender, to, contentParams, subject, content = '' }: MailerOptions,
-  clientApiKey: string,
-) =>
-  new Promise((resolve: any, reject: any) => {
-    const apiKey = defaultClient.authentications['api-key'];
-    apiKey.apiKey = clientApiKey;
+  async sendEmail(opts: MailerOptions) {
+    const post = bent('POST', 'json', { 'api-key': this.apiKey });
+    let result;
+    try {
+      result = await post('https://api.brevo.com/v3/smtp/email', opts);
+    } catch (e) {
+      if (e.statusCode >= 400) throw e;
+    }
 
-    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    return result;
+  }
 
-    sendSmtpEmail.subject = subject;
-    sendSmtpEmail.htmlContent = content;
-    sendSmtpEmail.sender = sender;
-    sendSmtpEmail.to = to;
-    sendSmtpEmail.params = {
-      parameter: '',
-      ...contentParams,
-    };
-    apiInstance.sendTransacEmail(sendSmtpEmail).then(resolve, reject);
-  });
+  async createContact(opts: ContactOptions) {
+    const post = bent('POST', 'json', { 'api-key': this.apiKey });
+    let result;
+    try {
+      result = post('https://api.brevo.com/v3/contacts', opts);
+    } catch (e) {
+      if (e.statusCode >= 400) throw e;
+    }
 
-export const emailClientByTemplateId = (
-  { sender, to, contentParams, subject, templateId = 0 }: MailerOptions,
-  clientApiKey: string,
-) =>
-  new Promise((resolve: (arg0: null) => any) => {
-    const apiKey = defaultClient.authentications['api-key'];
-    apiKey.apiKey = clientApiKey;
+    return result;
+  }
 
-    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+  async getContactInfo(email: string): Promise<ContactInfo> {
+    const get = bent('GET', 'json', { 'api-key': this.apiKey });
+    let result;
+    try {
+      result = get(
+        `https://api.brevo.com/v3/contacts/${encodeURIComponent(email)}`,
+      );
+    } catch (e) {
+      if (e.statusCode >= 400) throw e;
+    }
 
-    sendSmtpEmail.subject = subject;
-    sendSmtpEmail.templateId = templateId;
-    sendSmtpEmail.sender = sender;
-    sendSmtpEmail.to = to;
-    sendSmtpEmail.params = {
-      parameter: '',
-      ...contentParams,
-    };
-    apiInstance
-      .sendTransacEmail(sendSmtpEmail)
-      .then(resolve, () => resolve(null));
-  });
+    return result;
+  }
 
-export const updateTemplate = (
-  templateId: number,
-  content: string,
-  clientApiKey: string
-) =>
-  new Promise((resolve: (arg0: null) => any) => {
-    const apiKey = defaultClient.authentications['api-key'];
-    apiKey.apiKey = clientApiKey;
+  async removeContactFromList(mailListId: string, opts: { emails: string[] }) {
+    const post = bent('POST', 'json', { 'api-key': this.apiKey });
+    let result;
+    try {
+      result = post(
+        `https://api.brevo.com/v3/contacts/lists/${mailListId}/contacts/remove`,
+        opts,
+      );
+    } catch (e) {
+      if (e.statusCode >= 400) throw e;
+    }
 
-    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-    let smtpTemplate = new SibApiV3Sdk.UpdateSmtpTemplate();
-    smtpTemplate.htmlContent = content;
-
-    apiInstance.updateSmtpTemplate(templateId, smtpTemplate).then(resolve, (error) => {
-      console.error(error);
-      resolve(null)
-    });
-  });
-
-
-export default emailClient;
+    return result;
+  }
+}

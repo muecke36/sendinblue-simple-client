@@ -1,21 +1,3 @@
-import { templatesProvider } from './templatesProvider';
-import { emailClient, emailClientByTemplateId, updateTemplate } from './emailClient';
-
-const defaultOptions = {
-  to: [
-    {
-      name: 'John Doe',
-      email: 'john@doe.co',
-    },
-  ],
-  content: '', // template from sendinblue api
-  contentParams: {
-    name: 'Some key',
-    code: 'some value',
-  }, // key and value for replace in the template
-  subject: '[Subject] My subject info',
-};
-
 export type EmailUser = {
   email: string;
   name: string;
@@ -24,31 +6,70 @@ export type EmailUser = {
 export type MailerOptions = {
   sender: EmailUser;
   to: EmailUser[];
-  subject: string;
-  content?: string;
-  templateId: number;
-  contentParams: {
+  replyTo?: EmailUser;
+  subject?: string;
+  htmlContent?: string;
+  attachment?: { url?: string; content?: string; name: string }[];
+  templateId?: number;
+  params?: {
     [key: string]: string;
   };
 };
 
-export class SendinBlueClient {
-  apiKey: string;
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
-  async updateTemplate(tempalteId: number, content: string): Promise<any> {
-    return updateTemplate(tempalteId, content, this.apiKey);
-  }
-  async sendEmail(options: MailerOptions | any) {
-    return await emailClient(options, this.apiKey);
-  }
-  async sendEmailWithTemplateById(options: MailerOptions | any) {
-    return await emailClientByTemplateId(options, this.apiKey);
-  }
-  async templatesProvider(templateId = 0) {
-    return await templatesProvider(templateId, this.apiKey);
-  }
+export type ContactOptions = {
+  email: string;
+  listIds: number[];
+  updateEnabled: boolean;
+  attributes: Record<string, string>;
+};
+
+export interface ContactInfo {
+  email: string;
+  id: number;
+  emailBlacklisted: boolean;
+  smsBlacklisted: boolean;
+  createdAt: string;
+  modifiedAt: string;
+  attributes: Attributes;
+  listIds?: number[] | null;
+  statistics: Statistics;
+}
+export interface Attributes {
+  FIRST_NAME: string;
+  LAST_NAME: string;
+  SMS: string;
+  CIV: string;
+  DOB: string;
+  ADDRESS: string;
+  ZIP_CODE: string;
+  CITY: string;
+  AREA: string;
+}
+export interface Statistics {
+  messagesSent?: MessagesSentEntity[] | null;
+  opened?: OpenedEntityOrDeliveredEntity[] | null;
+  clicked?: ClickedEntity[] | null;
+  delivered?: OpenedEntityOrDeliveredEntity[] | null;
+}
+export interface MessagesSentEntity {
+  campaignId: number;
+  eventTime: string;
+}
+export interface OpenedEntityOrDeliveredEntity {
+  campaignId: number;
+  count: number;
+  eventTime: string;
+  ip: string;
+}
+export interface ClickedEntity {
+  campaignId: number;
+  links?: LinksEntity[] | null;
+}
+export interface LinksEntity {
+  count: number;
+  eventTime: string;
+  ip: string;
+  url: string;
 }
 
-export default SendinBlueClient;
+export * from './emailClient.js';
